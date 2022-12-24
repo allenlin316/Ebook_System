@@ -14,6 +14,10 @@
     background-color: #555362;
 }
 
+body{
+    background-color: #96A2B8; 
+}
+
 .error{
     background: #f36060;
     color: #ffffff;
@@ -21,4 +25,5 @@
     width: 100%;
     border-radius: 5px;
     margin: 20px auto;
+    text-align: center;
 }

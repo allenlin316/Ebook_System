@@ -18,7 +18,7 @@ if($row["user_name"]==$username && $row["password"]==$password){
     exit();
 }
 else{
-    header("Location: index.php?error=Incorrect User name or Password");
+    header("Location: index.php?error=   Incorrect User name or Password");
     exit();
 }
 ?>

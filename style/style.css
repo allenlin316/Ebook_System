@@ -1,0 +1,24 @@
+.jumbotron{
+    background-color: #555362;
+    color: white;
+}
+
+.form-signin{
+    width: 100%;
+    max-width: 330px;
+    padding: 15px;
+    margin: 0 auto;
+}
+
+.btn-login, .btn-register{
+    background-color: #555362;
+}
+
+.error{
+    background: #f36060;
+    color: #ffffff;
+    padding: 10px;
+    width: 100%;
+    border-radius: 5px;
+    margin: 20px auto;
+}

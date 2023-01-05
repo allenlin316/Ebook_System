@@ -18,7 +18,9 @@
         <?php if(isset($_GET["error"])) { ?>
             <p class="error"><?php echo $_GET["error"]; ?></p>
         <?php } ?>
-        <!-- <h2 class="h3 mb-3 text-center">請登入</h2> -->
+        <?php if(isset($_GET["success"])) { ?>
+            <p class="success"><?php echo $_GET["success"]; ?></p>
+        <?php } ?>
         <label for="inputUser" class="sr-only">帳號</label>
         <input type="text" id="inputUser" name="username" class="form-control mb-3" placeholder="帳號" required>
         <label for="inputPassword" class="sr-only">密碼</label>

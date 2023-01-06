@@ -34,6 +34,7 @@
 ![](https://i.imgur.com/0LMO6Vb.png)
 
 ● 詳細資訊視窗可以``關閉``或``登出``
+
 ![](https://i.imgur.com/7sfAtep.png)
 
 
@@ -48,11 +49,13 @@
 ![](https://i.imgur.com/3FOIFOP.png)
 
 ● 若館藏有該書籍則顯示查詢結果
+
 ![](https://i.imgur.com/mdJ3vck.png)
 
 ![](https://i.imgur.com/iLUxXRe.png)
 
 ● 若館藏無該書籍則顯示查無結果
+
 ![](https://i.imgur.com/UuLnATV.png)
 
 ![](https://i.imgur.com/EJ5gdFi.png)

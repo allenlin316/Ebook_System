@@ -12,7 +12,7 @@ if(isset($_SESSION["id"]) && isset($_SESSION["user_name"])){
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="./bootstrap-4.6.2-dist/css/bootstrap.min.css">
         <link rel="stylesheet" href="./style/style.css">
-        <title>Library</title>
+        <title>收藏的電子書</title>
     </head>
     <body>
         <!-- Modal for account info -->
@@ -146,9 +146,9 @@ if(isset($_SESSION["id"]) && isset($_SESSION["user_name"])){
         <div class="jumbotron jumbotron-fluid">
             <button class="btn" data-toggle="modal" data-target="#account_icon"><img src="./images/account_icon.png" alt="account icon" class="rounded-circle bg-white position-absolute" style="width: 4%; left: 34px; top: 25px;"></button>
             <button class="btn" data-toggle="modal" data-target="#search_icon"><img src="./images/search_icon.png" alt="search icon" class="position-absolute" style="width: 6%; right: 100px; top: 21px;"></button>  
-            <a class="btn" href="./collections.php"><img src="./images/heart_icon.png" alt="heart icon" class="position-absolute" style="width: 3%; right: 30px; top: 33px;"></a>          
+            <a class="btn" href="./home.php"><img src="./images/home-menu-icon.jpg" alt="home menu icon" class="position-absolute" style="width: 4%; right: 30px; top: 25px;"></a>          
             <div class="container">
-                <h1 class="display-1 text-center"><a href="./home.php" style="text-decoration: none; color: white">EBOOK</a></h1>            
+                <h1 class="display-1 text-center"><a href="./collections.php" style="text-decoration: none; color: white">COLLECTION</a></h1>            
             </div>
         </div>       
         <div class="container-fluid">        
@@ -174,18 +174,29 @@ if(isset($_SESSION["id"]) && isset($_SESSION["user_name"])){
                         echo "<p class=\"display-4 text-danger\">查無結果請重新搜尋</p>";
                     }                                         
                     else{
-                        $sql = "SELECT * FROM books";
+                        $hasCollection = false;
+                        $sql = "SELECT * FROM user_book";
                         $result = mysqli_query($conn, $sql);
-                        $row = mysqli_fetch_all($result, MYSQLI_ASSOC);
-                        $num_of_rows = mysqli_num_rows($result);                    
-                        for($i=0; $i<$num_of_rows; $i++){                           
-                            // list all books from the database                            
-                            echo "<div class=\"col-md-2 mb-3 m-1 card\" style=\"width: 180px; height: auto;\"data-toggle=\"modal\" data-target=\"#modal_{$row[$i]["book_id"]}\">
-                            <button type=\"button\" class=\"btn\"><img src=\"./images/{$row[$i]["title"]}.jpg\" style=\"width: 60%; height: 180px;\" class=\"card-img-top mx-auto\" alt=\"atomic_habit book\"></button>
-                            <div class=\"card-body\">
-                                <h5 class=\"card-title text-center\">{$row[$i]["title"]}</h5>                            
-                            </div>
-                            </div>";
+                        $user_to_book = mysqli_fetch_all($result, MYSQLI_ASSOC);
+                        $result = mysqli_query($conn, "SELECT * FROM books");
+                        $books = mysqli_fetch_all($result, MYSQLI_ASSOC);                        
+                        foreach($user_to_book as $row){ // list all collections of user from the database
+                            if($_SESSION["id"] == $row["user_id"]){
+                                $hasCollection = true;
+                                foreach($books as $book){
+                                    if($book["book_id"] == $row["book_id"]){
+                                        echo "<div class=\"col-md-2 mb-3 m-1 card\" style=\"width: 180px; height: auto;\"data-toggle=\"modal\" data-target=\"#modal_{$row["book_id"]}\">
+                                        <button type=\"button\" class=\"btn\"><img src=\"./images/{$book["title"]}.jpg\" style=\"width: 60%; height: 180px;\" class=\"card-img-top mx-auto\" alt=\"atomic_habit book\"></button>
+                                        <div class=\"card-body\">
+                                        <h5 class=\"card-title text-center\">{$book["title"]}</h5>                            
+                                        </div>
+                                        </div>";
+                                    }
+                                }                                
+                            }
+                        }
+                        if(!$hasCollection){ // 沒有珍藏的電子書
+                            echo "<p class=\"display-4 text-danger\">沒有珍藏的書籍喔</p>";
                         }
                     } 
                     ?>                                    

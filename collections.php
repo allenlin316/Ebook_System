@@ -1,4 +1,5 @@
 <?php
+ob_start();
 session_start();
 include "db_conn.php";
 
@@ -40,13 +41,13 @@ if(isset($_SESSION["id"]) && isset($_SESSION["user_name"])){
             <div class="modal-dialog">
                 <div class="modal-content">
                 <div class="modal-header">                    
-                    <h5 class="modal-title" id="search_icon">電子書查詢</h5>
+                    <h5 class="modal-title" id="search_icon">珍藏書查詢</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form class="form-inline my-2 my-lg-0" method="get" action="./home.php">
+                    <form class="form-inline my-2 my-lg-0" method="get" action="./collections.php">
                         <input class="form-control mr-sm-2" name="target_book" type="search" placeholder="Search" aria-label="Search">
                         <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>                        
                     </form>
@@ -154,24 +155,26 @@ if(isset($_SESSION["id"]) && isset($_SESSION["user_name"])){
         <div class="container-fluid">        
             <div class="row justify-content-around">
                     <?php 
-                    if(isset($_GET["target_book"])) {
-                        $target_book = $_GET["target_book"];
-                        $sql = "SELECT * FROM books WHERE `title` = " . "'" . $target_book . "'";
-                        $result = mysqli_query($conn, $sql);
-                        $row = mysqli_fetch_all($result, MYSQLI_ASSOC);
+                    if(isset($_GET["target_book"])) {                        
+                        $target_book = $_GET["target_book"];                       
+                        $sql_title = "SELECT * FROM books INNER JOIN user_book ON books.book_id=user_book.book_id WHERE user_id='" . $_SESSION["id"] . "'";                        
+                        $result = mysqli_query($conn, $sql_title);
+                        $all_result = mysqli_fetch_all($result, MYSQLI_ASSOC);
                         $num_of_rows = mysqli_num_rows($result);  
                         if($num_of_rows == 0){
-                            header("Location: home.php?error=找不到此書籍");
+                            header("Location: collections.php?error=找不到此書籍");
                         }
-                        echo "<div class=\"col-md-2 mb-3 card\" style=\"width: 180px; height: auto;\"data-toggle=\"modal\" data-target=\"#modal_{$row[0]["book_id"]}\">
-                        <img src=\"./images/{$row[0]["title"]}.jpg\" style=\"width: 60%; height: 180px;\" class=\"card-img-top mx-auto\" alt=\"atomic_habit book\">
-                        <div class=\"card-body\">
-                            <h5 class=\"card-title text-center\">{$row[0]["title"]}</h5>                            
-                        </div>
-                        </div>";
+                        foreach($all_result as $row){
+                            echo "<div class=\"col-md-2 mb-3 card\" style=\"width: 180px; height: auto;\"data-toggle=\"modal\" data-target=\"#modal_{$row["book_id"]}\">
+                            <img src=\"./images/{$row["title"]}.jpg\" style=\"width: 60%; height: 180px;\" class=\"card-img-top mx-auto\" alt=\"atomic_habit book\">
+                            <div class=\"card-body\">
+                                <h5 class=\"card-title text-center\">{$row["title"]}</h5>                            
+                            </div>
+                            </div>";
+                        }                        
                     }
                     else if(isset($_GET["error"])){
-                        echo "<p class=\"display-4 text-danger\">查無結果請重新搜尋</p>";
+                        echo "<p class=\"display-4 text-danger text-center\">你沒有珍藏任何書籍</p>";
                     }                                         
                     else{
                         $hasCollection = false;
@@ -213,4 +216,5 @@ else{
     header("Location: index.php");
     exit();
 }
+ob_end_flush();
 ?>

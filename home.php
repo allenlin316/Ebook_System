@@ -1,4 +1,5 @@
 <?php
+ob_start();
 session_start();
 include "db_conn.php";
 
@@ -40,15 +41,25 @@ if(isset($_SESSION["id"]) && isset($_SESSION["user_name"])){
             <div class="modal-dialog">
                 <div class="modal-content">
                 <div class="modal-header">                    
-                    <h5 class="modal-title" id="search_icon">電子書查詢</h5>
+                    <h5 class="modal-title" id="search_icon">全館電子書查詢</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <form class="form-inline my-2 my-lg-0" method="get" action="./home.php">
-                        <input class="form-control mr-sm-2" name="target_book" type="search" placeholder="Search" aria-label="Search">
-                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>                        
+                        <input class="form-control mr-sm-2" name="target_name" type="search" placeholder="Search" aria-label="Search">
+                        <div class="input-group">
+                            <label for="target_selection" hidden></label>
+                            <select id="target_selection" name="target_selection" aria-label="Example select with button addon">                                
+                                <option value="作者">作者</option>
+                                <option value="書名" selected>書名</option>
+                                <option value="出版商">出版商</option>
+                            </select>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="submit">搜尋</button>
+                            </div>
+                        </div>                                              
                     </form>
                 </div>
                 <div class="modal-footer">                    
@@ -153,25 +164,39 @@ if(isset($_SESSION["id"]) && isset($_SESSION["user_name"])){
         </div>       
         <div class="container-fluid">        
             <div class="row justify-content-around">
-                    <?php 
-                    if(isset($_GET["target_book"])) {
-                        $target_book = $_GET["target_book"];
-                        $sql = "SELECT * FROM books WHERE `title` = " . "'" . $target_book . "'";
+                    <?php                     
+                    if(isset($_GET["target_name"])) {
+                        $target_name = $_GET["target_name"];
+                        $target_selection = $_GET["target_selection"];                 
+                        if($target_selection == "作者"){                            
+                            $first_name = explode(' ', $target_name)[0];                            
+                            $last_name = explode(' ', $target_name)[1];                          
+                            $sql = "SELECT * FROM books WHERE books.book_id IN (
+                                SELECT author_book.book_id FROM author_book INNER JOIN authors ON authors.author_id=author_book.author_id WHERE authors.first_name='" . $first_name . "' AND authors.last_name='" . $last_name . "')";
+                        }
+                        else if($target_selection == "出版商"){
+                            $sql = "SELECT * FROM books INNER JOIN publishers ON publishers.publisher_id=books.publisher_id WHERE publishers.publisher_name='" . $target_name . "'";
+                        }
+                        else{
+                            $sql = "SELECT * FROM books WHERE `title` = " . "'" . $target_name . "'";
+                        }                        
                         $result = mysqli_query($conn, $sql);
-                        $row = mysqli_fetch_all($result, MYSQLI_ASSOC);
+                        $all_result = mysqli_fetch_all($result, MYSQLI_ASSOC);
                         $num_of_rows = mysqli_num_rows($result);  
                         if($num_of_rows == 0){
                             header("Location: home.php?error=找不到此書籍");
                         }
-                        echo "<div class=\"col-md-2 mb-3 card\" style=\"width: 180px; height: auto;\"data-toggle=\"modal\" data-target=\"#modal_{$row[0]["book_id"]}\">
-                        <img src=\"./images/{$row[0]["title"]}.jpg\" style=\"width: 60%; height: 180px;\" class=\"card-img-top mx-auto\" alt=\"atomic_habit book\">
-                        <div class=\"card-body\">
-                            <h5 class=\"card-title text-center\">{$row[0]["title"]}</h5>                            
-                        </div>
-                        </div>";
+                        foreach($all_result as $row){
+                            echo "<div class=\"col-md-2 mb-3 card\" style=\"width: 180px; height: auto;\"data-toggle=\"modal\" data-target=\"#modal_{$row["book_id"]}\">
+                            <img src=\"./images/{$row["title"]}.jpg\" style=\"width: 60%; height: 180px;\" class=\"card-img-top mx-auto\" alt=\"atomic_habit book\">
+                            <div class=\"card-body\">
+                                <h5 class=\"card-title text-center\">{$row["title"]}</h5>                            
+                            </div>
+                            </div>";
+                        }
                     }
                     else if(isset($_GET["error"])){
-                        echo "<p class=\"display-4 text-danger\">查無結果請重新搜尋</p>";
+                        echo "<p class=\"display-4 text-danger text-center\">查無結果請重新搜尋<br><span>(記得要選類別喔)</sapn></p>";              
                     }                                         
                     else{
                         $sql = "SELECT * FROM books";
@@ -187,7 +212,7 @@ if(isset($_SESSION["id"]) && isset($_SESSION["user_name"])){
                             </div>
                             </div>";
                         }
-                    } 
+                    }                     
                     ?>                                    
             </div>                
         </div>                
@@ -202,4 +227,5 @@ else{
     header("Location: index.php");
     exit();
 }
+ob_end_flush();
 ?>

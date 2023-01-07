@@ -48,8 +48,18 @@ if(isset($_SESSION["id"]) && isset($_SESSION["user_name"])){
                 </div>
                 <div class="modal-body">
                     <form class="form-inline my-2 my-lg-0" method="get" action="./collections.php">
-                        <input class="form-control mr-sm-2" name="target_book" type="search" placeholder="Search" aria-label="Search">
-                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>                        
+                        <input class="form-control mr-sm-2" name="target_name" type="search" placeholder="Search" aria-label="Search">
+                        <div class="input-group">
+                            <label for="target_selection" hidden></label>
+                            <select id="target_selection" name="target_selection" aria-label="Example select with button addon">                                
+                                <option value="作者">作者</option>
+                                <option value="書名" selected>書名</option>
+                                <option value="出版商">出版商</option>
+                            </select>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="submit">搜尋</button>
+                            </div>
+                        </div>                        
                     </form>
                 </div>
                 <div class="modal-footer">                    
@@ -155,26 +165,51 @@ if(isset($_SESSION["id"]) && isset($_SESSION["user_name"])){
         <div class="container-fluid">        
             <div class="row justify-content-around">
                     <?php 
-                    if(isset($_GET["target_book"])) {                        
-                        $target_book = $_GET["target_book"];                       
-                        $sql_title = "SELECT * FROM books INNER JOIN user_book ON books.book_id=user_book.book_id WHERE user_id='" . $_SESSION["id"] . "'";                        
-                        $result = mysqli_query($conn, $sql_title);
-                        $all_result = mysqli_fetch_all($result, MYSQLI_ASSOC);
-                        $num_of_rows = mysqli_num_rows($result);  
-                        if($num_of_rows == 0){
-                            header("Location: collections.php?error=找不到此書籍");
+                    if(isset($_GET["target_name"])) {                        
+                        $target_name = $_GET["target_name"];
+                        $target_selection = $_GET["target_selection"];                 
+                        if($target_selection == "作者"){                            
+                            $first_name = explode(' ', $target_name)[0];                            
+                            $last_name = explode(' ', $target_name)[1];                          
+                            $sql = "SELECT * FROM books WHERE books.book_id IN (
+                                SELECT author_book.book_id FROM author_book INNER JOIN authors ON authors.author_id=author_book.author_id WHERE authors.first_name='" . $first_name . "' AND authors.last_name='" . $last_name . "')";
                         }
-                        foreach($all_result as $row){
-                            echo "<div class=\"col-md-2 mb-3 card\" style=\"width: 180px; height: auto;\"data-toggle=\"modal\" data-target=\"#modal_{$row["book_id"]}\">
-                            <img src=\"./images/{$row["title"]}.jpg\" style=\"width: 60%; height: 180px;\" class=\"card-img-top mx-auto\" alt=\"atomic_habit book\">
-                            <div class=\"card-body\">
-                                <h5 class=\"card-title text-center\">{$row["title"]}</h5>                            
-                            </div>
-                            </div>";
+                        else if($target_selection == "出版商"){
+                            $sql = "SELECT * FROM books INNER JOIN publishers ON publishers.publisher_id=books.publisher_id WHERE publishers.publisher_name='" . $target_name . "'";
+                        }
+                        else{
+                            $sql = "SELECT * FROM books WHERE `title` = " . "'" . $target_name . "'";
                         }                        
+                        $result = mysqli_query($conn, $sql);
+                        $all_result = mysqli_fetch_all($result, MYSQLI_ASSOC);
+                        $num_of_rows = mysqli_num_rows($result);                        
+                        if($num_of_rows == 0){ // 館藏根本沒有此書籍
+                            header("Location: collections.php?error=館藏沒有此書籍");
+                            exit();
+                        }
+                        $sql_collection = "SELECT * FROM books INNER JOIN user_book ON books.book_id=user_book.book_id WHERE user_id=" . $_SESSION["id"];
+                        $collections = mysqli_query($conn, $sql_collection);
+                        $all_collections = mysqli_fetch_all($collections, MYSQLI_ASSOC);
+                        $hasCollection = false;
+                        foreach($all_result as $row){
+                            foreach($all_collections as $collection_book){
+                                if($row["title"] == $collection_book["title"]){                                
+                                    $hasCollection = true;
+                                    echo "<div class=\"col-md-2 mb-3 card\" style=\"width: 180px; height: auto;\"data-toggle=\"modal\" data-target=\"#modal_{$row["book_id"]}\">
+                                    <img src=\"./images/{$row["title"]}.jpg\" style=\"width: 60%; height: 180px;\" class=\"card-img-top mx-auto\" alt=\"atomic_habit book\">
+                                    <div class=\"card-body\">
+                                        <h5 class=\"card-title text-center\">{$row["title"]}</h5>                            
+                                    </div>
+                                    </div>";
+                                }
+                            }                                                        
+                        }
+                        if(!$hasCollection){
+                            header("Location: collections.php?error=你沒有珍藏此書籍喔");
+                        }
                     }
                     else if(isset($_GET["error"])){
-                        echo "<p class=\"display-4 text-danger text-center\">你沒有珍藏任何書籍</p>";
+                        echo "<p class=\"display-4 text-danger text-center\">{$_GET["error"]}</p>";
                     }                                         
                     else{
                         $hasCollection = false;

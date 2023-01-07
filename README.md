@@ -2,6 +2,10 @@
 
 # Ebook System 
 
+## 開發使用工具
+* 前端: HTML、CSS、JS
+* 前端框架: Bootstrap v4.6
+* 後端: php、phpMyAdmin
 
 ## 主畫面設計
 
@@ -119,3 +123,5 @@
 ## 資料庫設計
 ![](https://i.imgur.com/AQOzMRJ.png)
 
+## 參考資料
+* 書籍來源: 博客來

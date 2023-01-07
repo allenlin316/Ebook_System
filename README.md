@@ -56,6 +56,7 @@
 ![](https://i.imgur.com/iLUxXRe.png)
 
 ● 使用其他類別查詢結果
+
 ![](https://i.imgur.com/ADzonCg.png)
 
 ![](https://i.imgur.com/kp8y8EG.png)
